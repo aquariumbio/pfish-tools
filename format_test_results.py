@@ -3,6 +3,12 @@ import glob
 import re
 import json
 
+def main():
+    for filename in glob.iglob('**/test_results.json', recursive=True):
+        print(convert_markdown(filename) + "\n")
+
+    print('here')
+
 def convert_markdown(filename):
     newlines = []
     ot_name = operation_type_name(filename)
@@ -146,5 +152,5 @@ def format_take(obj):
 def format_warning(txt):
     return "<span style=\"color:orange;\">**{}**</span>".format(txt)
 
-for filename in glob.iglob('**/test_results.json', recursive=True):
-    print(convert_markdown(filename) + "\n")
+if __name__ == "__main__":
+    main()
