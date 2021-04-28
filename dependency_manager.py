@@ -4,6 +4,7 @@ import re
 import json
 import subprocess
 import time
+import pathlib
 
 class DependencyManager():
     def __init__(self, category, operation_type, dependencies_file):
@@ -22,11 +23,12 @@ class DependencyManager():
             self.push_library(dependency)
 
     def push_library(self, dependency):
-        category = dependency["category"]
-        name = dependency["name"]
-        msg = self.push_library_check_status(category, name)
-        print(msg)
-        self.add_dependency_timestamp(dependency)
+        if self.library_stale(dependency):
+            category = dependency["category"]
+            name = dependency["name"]
+            msg = self.push_library_check_status(category, name)
+            print(msg)
+            self.add_dependency_timestamp(dependency)
 
     def push_library_check_status(self, category, name):
         directory = self.select_directory(category, name)
@@ -45,9 +47,10 @@ class DependencyManager():
             return 'error'
 
     def push_operation_type(self):
-        msg = self.pfish_exec('push', self.operation_type_directory)
-        print(msg)
-        self.add_operation_type_timestamp()
+        if self.operation_type_stale():
+            msg = self.pfish_exec('push', self.operation_type_directory)
+            print(msg)
+            self.add_operation_type_timestamp()
 
     def test_operation_type(self):
         msg = self.pfish_exec('test', self.operation_type_directory)
@@ -70,6 +73,35 @@ class DependencyManager():
 
     def timestamp(self):
         return time.time()
+
+    def operation_type_stale(self):
+        ptime = self.dependencies["last_push"].get(self.pfish_default)
+        if not ptime: return True
+
+        files = ["protocol.rb", "test.rb", "cost_model.rb", "documentation.rb", "precondition.rb"]
+        for file in files:
+            mtime = self.file_mtime(os.path.join(self.operation_type_directory, file))
+            if mtime > ptime: return True
+
+        return False
+
+    def library_stale(self, dependency):
+        directory = self.select_directory(dependency["category"], dependency["name"])
+        mtime = self.file_mtime(os.path.join(directory, "source.rb"))
+        ptime = dependency["last_push"].get(self.pfish_default)
+        if ptime:
+            return mtime > ptime
+        else:
+            return True
+
+    def operation_type_mtimes(self, directory):
+        # fnames = []
+        return []
+
+    def file_mtime(self, filename):
+        fname = pathlib.Path(filename)
+        assert fname.exists(), f'No such file: {filename}'
+        return fname.stat().st_mtime
 
     def get_pfish_default(self):
         cmd = "pfish configure show"
