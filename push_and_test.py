@@ -9,8 +9,8 @@ def main():
         args.dependencies_file
     )
 
+    dependency_manager.push_all_libraries()
     dependency_manager.push_operation_type()
-    dependency_manager.save_all_dependencies()
 
 def get_args():
     parser = ArgumentParser()
