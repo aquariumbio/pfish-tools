@@ -18,12 +18,12 @@ class DependencyManager():
         self.dependencies = self.select_dependencies()
         self.pfish_default = self.get_pfish_default()
 
-    def push_all_libraries(self):
+    def push_all_libraries(self, force):
         for dependency in self.dependencies["libraries"]:
-            self.push_library(dependency)
+            self.push_library(dependency, force)
 
-    def push_library(self, dependency):
-        if self.library_stale(dependency):
+    def push_library(self, dependency, force):
+        if force or self.library_stale(dependency):
             category = dependency["category"]
             name = dependency["name"]
             msg = self.push_library_check_status(category, name)
@@ -46,8 +46,8 @@ class DependencyManager():
         else:
             return 'error'
 
-    def push_operation_type(self):
-        if self.operation_type_stale():
+    def push_operation_type(self, force):
+        if force or self.operation_type_stale():
             msg = self.pfish_exec('push', self.operation_type_directory)
             print(msg)
             self.add_operation_type_timestamp()
