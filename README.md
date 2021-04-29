@@ -7,7 +7,7 @@ The script `format_test_results.py` converts the `results.json` output of pfish 
 ## Push and Test Dependencies
 `push-and-test` is a Dockerized app that manages dependencies for protocols. The dependency information is stored in a JSON file like this one:
 
-```json
+```
 [
   {
     "category": "Demo",            # OperationType
@@ -44,7 +44,7 @@ install -m 0755 push-and-test-wrapper ~/bin/push-and-test
 First, create a JSON like the one above that describes your dependencies. (Script to do this coming soon.) Place this file in the directory that contains your pfish repos:
 ```bash
 `-- my_pfish_protocols
-    |-- dependencies.json <-
+    |-- dependencies.json <<<
     |-- demo-repo
     |   |-- demo
     |   `-- demo_libs
