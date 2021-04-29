@@ -8,6 +8,7 @@ import pathlib
 
 class DependencyManager():
     PFISH_CMD = "python3 ../script/pyfish.py"
+    NEWLINE = "\n"
 
     def __init__(self, category, operation_type, dependencies_file):
         self.operation_type_category = category
@@ -41,14 +42,13 @@ class DependencyManager():
 
     # TODO: This is not working because the messages from are not being passed back
     def library_push_status(self, msg, name):
-        return 'complete'
-        # report = msg.split("\r\n")[2]
-        # if report.endswith(name):
-        #     return 'complete'
-        # elif report.endswith("libraries.json"):
-        #     return 'created'
-        # else:
-        #     return 'error'
+        report = msg.split(DependencyManager.NEWLINE)[2]
+        if report.endswith(name):
+            return 'complete'
+        elif report.endswith("libraries.json"):
+            return 'created'
+        else:
+            return 'error'
 
     def push_operation_type(self, force):
         if force or self.operation_type_stale():
@@ -63,7 +63,7 @@ class DependencyManager():
 
     def pfish_exec(self, task, directory):
         cmd = "{} {} -d '{}'".format(DependencyManager.PFISH_CMD, task, directory)
-        return subprocess.check_output(cmd, shell=True).decode("utf-8")
+        return self.subprocess_check_output(cmd)
 
     def add_dependency_timestamp(self, dependency):
         self.add_timestamp(dependency)
@@ -98,10 +98,6 @@ class DependencyManager():
         else:
             return True
 
-    def operation_type_mtimes(self, directory):
-        # fnames = []
-        return []
-
     def file_mtime(self, filename):
         fname = pathlib.Path(filename)
         assert fname.exists(), f'No such file: {filename}'
@@ -109,8 +105,12 @@ class DependencyManager():
 
     def get_pfish_default(self):
         cmd = "{} configure show".format(DependencyManager.PFISH_CMD)
-        msg = subprocess.check_output(cmd, shell=True).decode("utf-8")
-        return msg.split("\r\n")[0].split(" ")[-1]
+        msg = self.subprocess_check_output(cmd)
+        return msg.split(DependencyManager.NEWLINE)[0].split(" ")[-1]
+
+    def subprocess_check_output(self, cmd):
+        msg = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
+        return msg.decode("utf-8")
 
     def load_directories(self):
         directories = []
