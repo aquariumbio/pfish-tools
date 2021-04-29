@@ -7,7 +7,7 @@ The script `format_test_results.py` converts the `results.json` output of pfish 
 ## Push and Test Dependencies
 `push-and-test` is a Dockerized app that manages dependencies for protocols. The dependency information is stored in a JSON file like this one:
 
-```
+```bash
 [
   {
     "category": "Demo",            # OperationType
