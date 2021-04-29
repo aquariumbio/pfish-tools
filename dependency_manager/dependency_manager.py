@@ -20,14 +20,6 @@ class DependencyManager():
         self.dependencies = self.select_dependencies()
         self.pfish_default = self.get_pfish_default()
 
-    def set_pfish_default(self, name, login, password, url):
-        cmd = "{} configure add -n {} -l {} -p {} -u {}"
-        cmd = cmd.format(DependencyManager.PFISH_CMD, name, login, password, url)
-        msg = subprocess.check_output(cmd, shell=True).decode("utf-8")
-
-        cmd = "{} configure set-default -n {}".format(DependencyManager.PFISH_CMD, name)
-        msg = subprocess.check_output(cmd, shell=True).decode("utf-8")
-
     def push_all_libraries(self, force):
         for dependency in self.dependencies["libraries"]:
             self.push_library(dependency, force)
