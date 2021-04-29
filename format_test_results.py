@@ -7,8 +7,6 @@ def main():
     for filename in glob.iglob('**/test_results.json', recursive=True):
         print(convert_markdown(filename) + "\n")
 
-    print('here')
-
 def convert_markdown(filename):
     newlines = []
     ot_name = operation_type_name(filename)

@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# ensure a configuration directory
+CONFIG_DIR=$HOME/.pfish
+mkdir -p $CONFIG_DIR
+
+docker run \
+    --net=host \
+    --interactive --tty --rm \
+    --volume "$PWD":/wd \
+    --volume "$CONFIG_DIR:/script/config" \
+    --workdir /wd \
+    "push_and_test"  "$@"
