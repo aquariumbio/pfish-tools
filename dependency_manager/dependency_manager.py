@@ -7,6 +7,8 @@ import time
 import pathlib
 
 class DependencyManager():
+    PFISH_CMD = "python3 ../script/pyfish.py"
+
     def __init__(self, category, operation_type, dependencies_file):
         self.operation_type_category = category
         self.operation_type_name = operation_type
@@ -17,6 +19,14 @@ class DependencyManager():
         self.all_dependencies = self.load_all_dependencies()
         self.dependencies = self.select_dependencies()
         self.pfish_default = self.get_pfish_default()
+
+    def set_pfish_default(self, name, login, password, url):
+        cmd = "{} configure add -n {} -l {} -p {} -u {}"
+        cmd = cmd.format(DependencyManager.PFISH_CMD, name, login, password, url)
+        msg = subprocess.check_output(cmd, shell=True).decode("utf-8")
+
+        cmd = "{} configure set-default -n {}".format(DependencyManager.PFISH_CMD, name)
+        msg = subprocess.check_output(cmd, shell=True).decode("utf-8")
 
     def push_all_libraries(self, force):
         for dependency in self.dependencies["libraries"]:
@@ -37,14 +47,16 @@ class DependencyManager():
             msg = self.pfish_exec('push', directory)
         return msg
 
+    # TODO: This is not working because the messages from are not being passed back
     def library_push_status(self, msg, name):
-        report = msg.split("\r\n")[2]
-        if report.endswith(name):
-            return 'complete'
-        elif report.endswith("libraries.json"):
-            return 'created'
-        else:
-            return 'error'
+        return 'complete'
+        # report = msg.split("\r\n")[2]
+        # if report.endswith(name):
+        #     return 'complete'
+        # elif report.endswith("libraries.json"):
+        #     return 'created'
+        # else:
+        #     return 'error'
 
     def push_operation_type(self, force):
         if force or self.operation_type_stale():
@@ -58,7 +70,7 @@ class DependencyManager():
         self.add_operation_type_timestamp()
 
     def pfish_exec(self, task, directory):
-        cmd = "pfish {} -d '{}'".format(task, directory)
+        cmd = "{} {} -d '{}'".format(DependencyManager.PFISH_CMD, task, directory)
         return subprocess.check_output(cmd, shell=True).decode("utf-8")
 
     def add_dependency_timestamp(self, dependency):
@@ -104,7 +116,7 @@ class DependencyManager():
         return fname.stat().st_mtime
 
     def get_pfish_default(self):
-        cmd = "pfish configure show"
+        cmd = "{} configure show".format(DependencyManager.PFISH_CMD)
         msg = subprocess.check_output(cmd, shell=True).decode("utf-8")
         return msg.split("\r\n")[0].split(" ")[-1]
 

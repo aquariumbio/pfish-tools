@@ -3,11 +3,11 @@ from dependency_manager import DependencyManager
 
 def main():
     args = get_args()
-    dependency_manager = DependencyManager(
-        args.category,
-        args.operation_type,
-        args.dependencies_file
-    )
+    dependency_manager = DependencyManager(args.category, args.operation_type,
+                                           args.dependencies_file)
+
+    dependency_manager.set_pfish_default("laptop", "neptune",
+                                         "aquarium", "http://localhost")
 
     dependency_manager.push_all_libraries(args.force)
     dependency_manager.push_operation_type(args.force)
