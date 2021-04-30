@@ -2,9 +2,10 @@ import re
 import os
 import glob
 import json
+import time
 
-def build_dependencies(category, operation_type, dependencies_file):
-    found = find_dependencies(category, operation_type)
+def build_dependencies(category, operation_type, dependencies_file, definitions):
+    found = find_dependencies(category, operation_type, definitions)
     all_existing = load_existing_dependencies(dependencies_file)
 
     # Split remove the relevant dependency object from all_existing
@@ -28,7 +29,7 @@ def build_dependencies(category, operation_type, dependencies_file):
     save_all_dependencies(all_existing, dependencies_file)
 
 
-def find_dependencies(category, operation_type):
+def find_dependencies(category, operation_type, definitions):
     found = {
         "category": category,
         "name": operation_type,
@@ -37,9 +38,8 @@ def find_dependencies(category, operation_type):
     }
     unopened = []
 
-    directory_maps = load_directory_maps()
-    directory_map = select(directory_maps, category, operation_type)
-    unopened.append(directory_map)
+    definition = select(definitions, category, operation_type)
+    unopened.append(definition)
 
     while unopened:
         filepaths = [get_filepath(d) for d in unopened]
@@ -47,8 +47,8 @@ def find_dependencies(category, operation_type):
 
         for filepath in filepaths:
             for category, name in search_file(filepath):
-                directory_map = select(directory_maps, category, name)
-                if not directory_map:
+                definition = select(definitions, category, name)
+                if not definition:
                     msg = "Could not find pfish repository for {}/{}"
                     print(msg.format(category, name))
                     continue
@@ -62,7 +62,7 @@ def find_dependencies(category, operation_type):
                     found["libraries"].append(library)
 
                 if not select(unopened, category, name):
-                    unopened.append(directory_map)
+                    unopened.append(definition)
 
     return found
 
@@ -78,8 +78,8 @@ def search_file(filepath):
             needs.append((match.group(1), match.group(2)))
     return needs
 
-def load_directory_maps():
-    directory_maps = []
+def load_definitions():
+    definitions = []
     for filepath in glob.iglob('**/definition.json', recursive=True):
         with open(filepath, 'r') as f:
             definiton = json.load(f)
@@ -89,8 +89,8 @@ def load_directory_maps():
             "parent_class": definiton["parent_class"],
             "directory": os.path.dirname(filepath)
         }
-        directory_maps.append(directory)
-    return directory_maps
+        definitions.append(directory)
+    return definitions
 
 def select(lst, category, name):
     selected = (x for x in lst if x["category"] == category and x["name"] == name)
@@ -99,15 +99,15 @@ def select(lst, category, name):
 def remove(lst, category, name):
     return [x for x in lst if not (x["category"] == category and x["name"] == name)]
 
-def get_filepath(directory_map):
-    parent_class = directory_map["parent_class"]
+def get_filepath(definition):
+    parent_class = definition["parent_class"]
     if parent_class == "Library":
         filename = "source.rb"
     elif parent_class == "OperationType":
         filename = "protocol.rb"
     else:
         raise "Unrecognized parent class: {}".format(parent_class)
-    return os.path.join(directory_map["directory"], filename)
+    return os.path.join(definition["directory"], filename)
 
 def load_existing_dependencies(dependencies_file):
     if os.path.exists(dependencies_file):

@@ -1,14 +1,17 @@
 from argparse import ArgumentParser
 from dependency_manager import DependencyManager
-from dependency_builder import build_dependencies
+from dependency_builder import load_definitions, build_dependencies
 
 def main():
     args = get_args()
-    build_dependencies(args.category, args.operation_type, args.dependencies_file)
+
+    definitions = load_definitions()
+    build_dependencies(args.category, args.operation_type,
+                       args.dependencies_file, definitions)
 
     if not args.build_only:
         dependency_manager = DependencyManager(args.category, args.operation_type,
-                                               args.dependencies_file)
+                                               args.dependencies_file, definitions)
 
         dependency_manager.push_all_libraries(args.force)
         dependency_manager.push_operation_type(args.force)

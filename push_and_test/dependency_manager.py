@@ -10,10 +10,10 @@ class DependencyManager():
     PFISH_CMD = "python3 ../script/pyfish.py"
     NEWLINE = "\n"
 
-    def __init__(self, category, operation_type, dependencies_file):
+    def __init__(self, category, operation_type, dependencies_file, definitions):
         self.operation_type_category = category
         self.operation_type_name = operation_type
-        self.directories = self.load_directories()
+        self.definitions = definitions
         self.operation_type_directory = self.select_directory(self.operation_type_category,
                                                               self.operation_type_name)
         self.dependencies_file = dependencies_file
@@ -112,19 +112,6 @@ class DependencyManager():
         msg = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
         return msg.decode("utf-8")
 
-    def load_directories(self):
-        directories = []
-        for filepath in glob.iglob('**/definition.json', recursive=True):
-            with open(filepath, 'r') as f:
-                definiton = json.load(f)
-            directory = {
-                "name": definiton["name"],
-                "category": definiton["category"],
-                "directory": os.path.dirname(filepath)
-            }
-            directories.append(directory)
-        return directories
-
     def load_all_dependencies(self):
         with open(self.dependencies_file, 'r') as f:
             all_dependencies = json.load(f)
@@ -139,7 +126,7 @@ class DependencyManager():
                            self.operation_type_name)
 
     def select_directory(self, category, name):
-        return self.select(self.directories, category, name).get("directory")
+        return self.select(self.definitions, category, name).get("directory")
 
     def select(self, lst, category, name):
         selected = (x for x in lst if x["category"] == category and x["name"] == name)
