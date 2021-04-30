@@ -1,13 +1,17 @@
 from argparse import ArgumentParser
 from dependency_manager import DependencyManager
+from dependency_builder import build_dependencies
 
 def main():
     args = get_args()
-    dependency_manager = DependencyManager(args.category, args.operation_type,
-                                           args.dependencies_file)
+    build_dependencies(args.category, args.operation_type, args.dependencies_file)
 
-    dependency_manager.push_all_libraries(args.force)
-    dependency_manager.push_operation_type(args.force)
+    if not args.build_only:
+        dependency_manager = DependencyManager(args.category, args.operation_type,
+                                               args.dependencies_file)
+
+        dependency_manager.push_all_libraries(args.force)
+        dependency_manager.push_operation_type(args.force)
 
 def get_args():
     parser = ArgumentParser()
@@ -19,6 +23,8 @@ def get_args():
                         help="category of the operation type")
     parser.add_argument("-f", "--force", action='store_true',
                         help="push all dependencies regardless of update time")
+    parser.add_argument("-B", "--build_only", action='store_true',
+                        help="rebuild the dependencies file but don't push or test")
     return parser.parse_args()
 
 if __name__ == "__main__":

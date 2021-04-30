@@ -4,7 +4,29 @@ import glob
 import json
 
 def build_dependencies(category, operation_type, dependencies_file):
-    found_dependencies = find_dependencies(category, operation_type)
+    found = find_dependencies(category, operation_type)
+    all_existing = load_existing_dependencies(dependencies_file)
+
+    # Split remove the relevant dependency object from all_existing
+    existing = select(all_existing, category, operation_type)
+    all_existing = remove(all_existing, category, operation_type)
+
+    # Transfer the last_push objects from the existing JSON
+    if existing:
+        found["last_push"] = existing.get("last_push", {})
+        for found_library in found["libraries"]:
+            existing_library = select(existing["libraries"],
+                                      found_library["category"],
+                                      found_library["name"])
+            if existing_library:
+                found_library["last_push"] = existing_library.get("last_push", {})
+
+    found["libraries"].sort(key=lambda x: (x["category"], x["name"]))
+
+    # Recombine and save the file with updated dependencies
+    all_existing.append(found)
+    save_all_dependencies(all_existing, dependencies_file)
+
 
 def find_dependencies(category, operation_type):
     found = {
@@ -74,6 +96,9 @@ def select(lst, category, name):
     selected = (x for x in lst if x["category"] == category and x["name"] == name)
     return next(selected, None)
 
+def remove(lst, category, name):
+    return [x for x in lst if not (x["category"] == category and x["name"] == name)]
+
 def get_filepath(directory_map):
     parent_class = directory_map["parent_class"]
     if parent_class == "Library":
@@ -84,7 +109,14 @@ def get_filepath(directory_map):
         raise "Unrecognized parent class: {}".format(parent_class)
     return os.path.join(directory_map["directory"], filename)
 
-if __name__ == "__main__":
-    dependencies = find_dependencies("Yeast Display", "Challenge and Label")
-    print(dependencies)
+def load_existing_dependencies(dependencies_file):
+    if os.path.exists(dependencies_file):
+        with open(dependencies_file, 'r') as f:
+            existing_dependencies = json.load(f)
+        return existing_dependencies
+    else:
+        return []
 
+def save_all_dependencies(all_dependencies, dependencies_file):
+    with open(dependencies_file, 'w') as f:
+        json.dump(all_dependencies, f, indent=2)
