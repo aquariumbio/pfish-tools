@@ -6,7 +6,7 @@ ENV SCRIPT_DIR=/script
 WORKDIR ${SCRIPT_DIR}
 
 # copy script into container
-COPY ./dependency_manager .
+COPY ./push_and_test/ .
 
 # run script by default
 ENTRYPOINT ["python3", "/script/push_and_test.py"]
