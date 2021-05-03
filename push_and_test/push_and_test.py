@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
 from dependency_manager import DependencyManager
-from dependency_builder import load_definitions, build_dependencies
+from dependency_builder import load_definitions, build_dependencies, default_dependencies_file
 
 def main():
     args = get_args()
@@ -18,7 +18,7 @@ def main():
 
 def get_args():
     parser = ArgumentParser()
-    parser.add_argument("-d", "--dependencies_file",
+    parser.add_argument("-d", "--dependencies_file", default=default_dependencies_file(),
                         help="the file containing dependencies to push before testing")
     parser.add_argument("-o", "--operation_type",
                         help="the operation type to push and test")

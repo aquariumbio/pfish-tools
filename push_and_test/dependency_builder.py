@@ -120,3 +120,11 @@ def load_existing_dependencies(dependencies_file):
 def save_all_dependencies(all_dependencies, dependencies_file):
     with open(dependencies_file, 'w') as f:
         json.dump(all_dependencies, f, indent=2)
+
+def default_dependencies_file():
+    return os.path.join(config_path(), 'dependencies.json')
+
+def config_path():
+    return os.path.normpath(
+        os.path.join(os.environ.get('SCRIPT_DIR'), 'config')
+    )
