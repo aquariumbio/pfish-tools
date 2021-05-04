@@ -42,10 +42,9 @@ class DependencyManager():
 
     # TODO: This is not working because the messages from are not being passed back
     def library_push_status(self, msg, name):
-        report = msg.split(DependencyManager.NEWLINE)[2]
-        if report.endswith(name):
+        if re.search("writing file {}".format(name), msg):
             return 'complete'
-        elif report.endswith("libraries.json"):
+        elif re.search("Checking whether Definition File is for a Library", msg):
             return 'created'
         else:
             return 'error'
