@@ -23,15 +23,23 @@ To run the app:
 cd path/to/my_pfish_protocols
 push-and-test -c 'Demo' -o 'Foo'
 ```
-This will push the OperationType `Foo` and its dependencies. It will also record the push time for each push in `dependencies.json`. The next time you run the script, it will only push the files that have been saved since the last push. To push all regardless of whether they have been updated, use the `-f` flag:
+This will push the dependencies of OperationType `Foo`, then push and test `Foo` itself. It will also record the push time for each push in `dependencies.json`. The next time you run the script, it will only push the files that have been saved since the last push. 
+
+To push all updated without testing, use the `-p` flag:
 ```bash
-push-and-test -c 'Demo' -o 'Foo' -f
+push-and-test -c 'Demo' -o 'Foo' -p
+```
+
+To push all regardless of whether they have been updated, use the `-f` flag:
+```bash
+push-and-test -c 'Demo' -o 'Foo' [-p] -f
 ```
 
 If you would like to only build or update the dependencies file, then run the app with the `-B` flag:
 ```bash
 push-and-test -c 'Demo' -o 'Foo' -B
 ```
+Note that the `-p` and `-f` flags have no effect when passed with the `-B` flag. 
 
 **At this time you can only push based on the OperationType.** Use pfish for pushing individual Libraries.
 
