@@ -1,4 +1,4 @@
-FROM aquariumbio/pfish:1.2.0
+FROM aquariumbio/pfish:1.2.1
 
 # create directories within container
 # /script is where the package lives

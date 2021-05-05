@@ -14,7 +14,11 @@ def main():
                                                args.dependencies_file, definitions)
 
         dependency_manager.push_all_libraries(args.force)
-        dependency_manager.push_operation_type(args.force)
+
+        if args.push_only:
+            dependency_manager.push_operation_type(args.force)
+        else:
+            dependency_manager.test_operation_type()
 
 def get_args():
     parser = ArgumentParser()
@@ -26,8 +30,11 @@ def get_args():
                         help="category of the operation type")
     parser.add_argument("-f", "--force", action='store_true',
                         help="push all dependencies regardless of update time")
-    parser.add_argument("-B", "--build_only", action='store_true',
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("-B", "--build_only", action='store_true',
                         help="rebuild the dependencies file but don't push or test")
+    group.add_argument("-p", "--push_only", action='store_true',
+                        help="push the operation type but don't test it")
     return parser.parse_args()
 
 if __name__ == "__main__":
