@@ -2,6 +2,7 @@ import os
 import glob
 import re
 import json
+from copy import copy
 
 def main():
     for filename in glob.iglob('**/test_results.json', recursive=True):
@@ -126,23 +127,32 @@ def format_check(txt):
 
 def format_table(tbl):
     formatted = ["<table>"]
-    style = "border: 1px solid gray; text-align: center"
+    base_style = "border: 1px solid gray; text-align: center"
     for row in tbl:
         newrow = ""
         for cell in row:
+            cell_style = copy(base_style)
             if isinstance(cell, dict):
-                newcell = cell.get("content") or "?"
-                if cell.get("class") == "td-filled-slot":
-                    style += "; background-color: lightskyblue"
-                    style += "; color: black"
-            else:
-                newcell = cell
+                content = cell.get("content") or "?"
+                klass = cell.get("class")
+                style = cell.get("style")
 
-            newrow += "<td style=\"{}\">{}</td>".format(style, newcell)
+                if isinstance(style, dict):
+                    cell_style += "; {}".format(style_as_html(style))
+                elif klass == "td-filled-slot":
+                    cell_style += "; background-color: lightskyblue"
+                    cell_style += "; color: black"
+            else:
+                content = cell
+
+            newrow += "<td style=\"{}\">{}</td>".format(cell_style, content)
         formatted.append("<tr>{}</tr>".format(newrow))
 
     formatted.append("</table>")
     return "".join(formatted)
+
+def style_as_html(style):
+    return "; ".join(["{}: {}".format(k, v) for k, v in style.items()])
 
 def format_take(obj):
     return "Item {} ({}) at {}".format(obj["id"], obj["name"], obj["location"])
